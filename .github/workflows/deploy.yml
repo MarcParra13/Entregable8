@@ -4,17 +4,25 @@ on:
     branches:
       - main
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Code
-      uses: warrenbuckley/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
     - name: Setup .NET Environment
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '6.0.x'
+    - name: Cache Dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-build-${{ hashFiles('**/lock.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-build-
     - name: Build and Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.MY_ACCESS_TOKEN }}
         publish_dir: ./bin/Release/net6.0/publish/wwwroot
+

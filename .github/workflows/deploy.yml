@@ -1,28 +1,25 @@
 name: deploy
+
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Setup .NET Environment
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '6.0.x'
-    - name: Cache Dependencies
-      uses: actions/cache@v2
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-build-${{ hashFiles('**/lock.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-build-
-    - name: Build and Deploy to GitHub Pages
+        dotnet-version: '7.0.x'
+
+    - name: Build and publish Blazor WebAssembly app
+      run: dotnet publish -c Release -o publish
+      
+    - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.MY_ACCESS_TOKEN }}
-        publish_dir: .publish/wwwroot
-
+        publish_dir: ./publish/wwwroot
